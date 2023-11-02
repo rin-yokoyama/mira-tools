@@ -1,12 +1,11 @@
-#include <iostream>
-#include <fstream>
-#include "mira_decoder.hpp"
+#include "mira_gpufit.hpp"
 
 int main(int argc, char **argv)
 {
     if (argc < 2)
     {
-        std::cout << "Usage: decode_mira_data [input_file.dat]" << std::endl;
+
+        std::cout << "Usage: gpufit_mira_data [input_file.dat]" << std::endl;
         return 1;
     }
     const std::string ifname = argv[1];
@@ -21,9 +20,12 @@ int main(int argc, char **argv)
     u_int32_t *buf32 = (u_int32_t *)buffer;
     auto data = mira::decode_buffer(buf32, size / 4, {0});
 
-    std::ofstream ofs("output.json");
+    std::vector<mira::OutputData> output_vec;
+    mira::gpufit_event_data(data, output_vec, 10000);
+
+    std::ofstream ofs("fit_output.json");
     ofs << "[" << std::endl;
-    mira::write_event_data_to_json(ofs, data);
+    mira::write_output_data_to_json(ofs, output_vec);
     ofs << "\n]" << std::endl;
     ofs.close();
     ifs.close();

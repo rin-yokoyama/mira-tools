@@ -30,8 +30,9 @@ mira::EventData mira::decode_an_event(u_int32_t *buf, const std::vector<int> &ch
         {
             ChannelData data;
             data.ch_ = channel_id;
-            data.size_ = segment_size - 3;
-            data.waveform_ = (u_int32_t *)(buf + idx + 1);
+            data.efn_ = addr;
+            data.size_ = 2 * (segment_size - 3);
+            data.waveform_ = (u_int16_t *)(buf + idx + 1);
             eventData.data_.emplace_back(data);
             skip(segment_size - 3);
         }
@@ -59,4 +60,30 @@ std::vector<mira::EventData> mira::decode_buffer(u_int32_t *buf, u_int32_t size,
         idx = idx + event_size;
     }
     return buff_data;
+}
+
+void mira::write_event_data_to_json(std::ofstream &ofs, const std::vector<mira::EventData> &data)
+{
+    for (const auto &evt : data)
+    {
+        ofs << "{" << std::endl;
+        ofs << "\"event_id\": " << evt.event_id_ << "," << std::endl;
+        ofs << "\"ts\": " << evt.ts_ << "," << std::endl;
+        ofs << "\"data\": [" << std::endl;
+        for (const auto &ch_data : evt.data_)
+        {
+            ofs << "{\"efn\": " << ch_data.efn_ << "," << std::endl;
+            ofs << "\"channel\": " << ch_data.ch_ << "," << std::endl;
+            ofs << "\"waveform\": [";
+            for (int i = 0; i < ch_data.size_; ++i)
+            {
+                ofs << ch_data.waveform_[i] << ",";
+            }
+            ofs.seekp(-1, std::ios_base::cur);
+            ofs << "]},\n";
+        }
+        ofs.seekp(-2, std::ios_base::cur);
+        ofs << "\n]},\n";
+    }
+    ofs.seekp(-2, std::ios_base::cur);
 }
