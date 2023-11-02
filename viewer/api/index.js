@@ -5,21 +5,12 @@ const cors = require('cors');
 const port = process.env.PORT || 1235;
 app.use(cors());
 
-// Your JSON data (replace this with your actual data)
-const jsonData = {
-    "x": [
-        1,
-        2,
-        3,
-        4
-    ],
-    "y": [
-        1,
-        1,
-        2,
-        2
-    ]
-};
+var jsonData;
+const fs = require('fs');
+fs.readFile('/home/daq/opt/mira-tools/work/output.json', 'utf-8', (err, data) => {
+    jsonData = JSON.parse(data);
+});
+
 
 // Define a route to serve the JSON data
 app.get('/api', (req, res) => {
