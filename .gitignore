@@ -1,4 +1,8 @@
 /build
 /work
-/viewer
 /install
+
+/viewer/package-lock.json
+/viewer/node_modules
+/viewer/dist
+/viewer/.parcel-cache
