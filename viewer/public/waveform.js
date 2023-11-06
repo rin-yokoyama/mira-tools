@@ -1,7 +1,7 @@
 function plotData() {
     const domain = window.location.origin.split(':')[1];
     const port = 1235;
-    const url = `${domain}:${port}/api`;
+    const url = `${domain}:${port}/api/waveform`;
 
     const event_id = document.getElementById('event_id').value;
     const channel = document.getElementById('channel').value;

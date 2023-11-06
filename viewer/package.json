@@ -8,12 +8,8 @@
     "parcel": "2.10.2",
     "plotly.js-dist": "2.27.0"
   },
-  "source": [
-    "public/index.html",
-    "api/index.js"
-  ],
   "scripts": {
-    "start:frontend": "parcel public/index.html --host 133.11.152.165 --port 1234",
+    "start:frontend": "parcel public/index.html public/fitresult.html --host 133.11.152.165 --port 1234",
     "start:backend": "node api/index.js",
     "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\""
   },
