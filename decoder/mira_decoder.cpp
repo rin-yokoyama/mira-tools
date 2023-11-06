@@ -64,6 +64,7 @@ std::vector<mira::EventData> mira::decode_buffer(u_int32_t *buf, u_int32_t size,
 
 void mira::write_event_data_to_json(std::ofstream &ofs, const std::vector<mira::EventData> &data)
 {
+    ofs << "[" << std::endl;
     for (const auto &evt : data)
     {
         ofs << "{" << std::endl;
@@ -86,4 +87,5 @@ void mira::write_event_data_to_json(std::ofstream &ofs, const std::vector<mira::
         ofs << "\n]},\n";
     }
     ofs.seekp(-2, std::ios_base::cur);
+    ofs << "\n]" << std::endl;
 }

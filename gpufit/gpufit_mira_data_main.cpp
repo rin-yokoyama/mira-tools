@@ -24,9 +24,7 @@ int main(int argc, char **argv)
     mira::gpufit_event_data(data, output_vec, 10000);
 
     std::ofstream ofs("fit_output.json");
-    ofs << "[" << std::endl;
     mira::write_output_data_to_json(ofs, output_vec);
-    ofs << "\n]" << std::endl;
     ofs.close();
     ifs.close();
 

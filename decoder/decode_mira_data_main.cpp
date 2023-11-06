@@ -22,9 +22,7 @@ int main(int argc, char **argv)
     auto data = mira::decode_buffer(buf32, size / 4, {0});
 
     std::ofstream ofs("output.json");
-    ofs << "[" << std::endl;
     mira::write_event_data_to_json(ofs, data);
-    ofs << "\n]" << std::endl;
     ofs.close();
     ifs.close();
 
