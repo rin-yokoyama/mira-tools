@@ -10,6 +10,7 @@ namespace mira
     {
         int index_;
         std::vector<float> params_;
+        std::vector<float> init_params_;
         float chi_squared_;
         int state_;
         int n_iterations_;

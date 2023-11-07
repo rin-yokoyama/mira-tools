@@ -1,17 +1,14 @@
+<html lang="en">
+
 <head>
-    <!-- Plotly.js -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mira-viewer</title>
 </head>
 
 <body>
-    <label for="event_id">Event id:</label>
-    <input id="event_id" name="event_id" value="1"></input>
-    <label for="channel">Channel:</label>
-    <input id="channel" name="channel" value="0"></input>
-    <button id="plot_button" type="button">plot</button>
-    <div id="plot"><!-- Plotly chart will be drawn inside this DIV --></div>
-    <script src="waveform.js"></script>
+    <div id="app"></div>
+    <script type="module" src="index.js"></script>
 </body>
+
+</html>

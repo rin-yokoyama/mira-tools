@@ -9,10 +9,10 @@ void mira::gpufit_event_data(const std::vector<mira::EventData> &input, std::vec
 
     PulseFitInterface fitter(batch_size, n_samples, 1);
     fitter.SetPrepulseRange(200);
-    fitter.SetInitialPeakTime(480);
+    // fitter.SetInitialPeakTime(480);
     fitter.SetInitialRiseTime(10);
     fitter.SetInitialDecayTime(100);
-    fitter.SetParametersToFit({1, 1, 1, 1, 0});
+    fitter.SetParametersToFit({1, 1, 1, 1, 1});
     mira::OutputData result;
     std::vector<int> ch_vec;
     std::vector<int> efn_vec;
@@ -25,6 +25,7 @@ void mira::gpufit_event_data(const std::vector<mira::EventData> &input, std::vec
         while (!fitter.ReadResults(
             result.fit_result_.index_,
             result.fit_result_.params_,
+            result.fit_result_.init_params_,
             result.fit_result_.state_,
             result.fit_result_.chi_squared_,
             result.fit_result_.n_iterations_))
@@ -79,6 +80,13 @@ void mira::write_output_data_to_json(std::ofstream &ofs, const std::vector<mira:
         ofs << "\"n_iterations\": " << evt.fit_result_.n_iterations_ << "," << std::endl;
         ofs << "\"fit_params\": [";
         for (const auto &param : evt.fit_result_.params_)
+        {
+            ofs << param << ",";
+        }
+        ofs.seekp(-1, std::ios_base::cur);
+        ofs << "],\n";
+        ofs << "\"init_params\": [";
+        for (const auto &param : evt.fit_result_.init_params_)
         {
             ofs << param << ",";
         }
