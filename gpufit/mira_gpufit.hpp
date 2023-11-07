@@ -3,7 +3,8 @@
 
 #include "Interfaces/PulseFitInterface.hpp"
 #include "mira_decoder.hpp"
-
+#include <thread>
+#include <future>
 namespace mira
 {
     struct FitResult
@@ -23,6 +24,26 @@ namespace mira
         int ch_;
         int event_id_;
         u_int64_t ts_;
+    };
+    class FitterClass
+    {
+    public:
+        FitterClass() {}
+        virtual ~FitterClass() {}
+
+        std::vector<mira::OutputData> Fit();
+        void Clear();
+        void Insert(const std::vector<mira::OutputData> &output);
+
+        int id_;
+        bool gpu_;
+        std::vector<mira::OutputData> *global_output_;
+        std::vector<mira::OutputData> output_;
+        PulseFitInterface *fitter;
+        std::vector<int> ch_vec;
+        std::vector<int> efn_vec;
+        std::vector<int> event_id_vec;
+        std::vector<u_int64_t> ts_vec;
     };
 
     void gpufit_event_data(const std::vector<mira::EventData> &input, std::vector<mira::OutputData> &output, const int batch_size = 10000);

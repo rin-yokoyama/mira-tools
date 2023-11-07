@@ -1,5 +1,48 @@
 #include "mira_gpufit.hpp"
 
+std::vector<mira::OutputData> mira::FitterClass::Fit()
+{
+    mira::OutputData result;
+    if (gpu_)
+        fitter->CallGpufit();
+    else
+        fitter->CallCpufit();
+    while (!fitter->ReadResults(
+        result.fit_result_.index_,
+        result.fit_result_.params_,
+        result.fit_result_.init_params_,
+        result.fit_result_.state_,
+        result.fit_result_.chi_squared_,
+        result.fit_result_.n_iterations_))
+    {
+        output_.emplace_back(result);
+    }
+    for (int i = 0; i < output_.size(); ++i)
+    {
+        output_[i].ch_ = ch_vec.at(i);
+        output_[i].efn_ = efn_vec.at(i);
+        output_[i].event_id_ = event_id_vec.at(i);
+        output_[i].ts_ = ts_vec.at(i);
+    }
+    return output_;
+    // Ready();
+}
+
+void mira::FitterClass::Insert(const std::vector<mira::OutputData> &output)
+{
+    global_output_->insert(global_output_->end(), output.begin(), output.end());
+    Clear();
+}
+
+void mira::FitterClass::Clear()
+{
+    output_.clear();
+    ch_vec.clear();
+    efn_vec.clear();
+    event_id_vec.clear();
+    ts_vec.clear();
+}
+
 void mira::gpufit_event_data(const std::vector<mira::EventData> &input, std::vector<mira::OutputData> &output, const int batch_size)
 {
     if (input.empty())
@@ -7,31 +50,42 @@ void mira::gpufit_event_data(const std::vector<mira::EventData> &input, std::vec
 
     const auto n_samples = input.at(0).data_.at(0).size_;
 
-    PulseFitInterface fitter(batch_size, n_samples, 1);
-    fitter.SetPrepulseRange(200);
-    // fitter.SetInitialPeakTime(480);
-    fitter.SetInitialRiseTime(10);
-    fitter.SetInitialDecayTime(100);
-    fitter.SetParametersToFit({1, 1, 1, 1, 1});
-    mira::OutputData result;
-    std::vector<int> ch_vec;
-    std::vector<int> efn_vec;
-    std::vector<int> event_id_vec;
-    std::vector<u_int64_t> ts_vec;
-
-    auto gpuFit = [&fitter, &result, &output]()
+    std::vector<mira::FitterClass> fitter_vec(5);
+    for (auto &fitter : fitter_vec)
     {
-        fitter.CallGpufit();
-        while (!fitter.ReadResults(
-            result.fit_result_.index_,
-            result.fit_result_.params_,
-            result.fit_result_.init_params_,
-            result.fit_result_.state_,
-            result.fit_result_.chi_squared_,
-            result.fit_result_.n_iterations_))
+        fitter.fitter = new PulseFitInterface(batch_size, n_samples, 1);
+        fitter.fitter->SetPrepulseRange(200);
+        // fitter.fitter->SetInitialPeakTime(480);
+        fitter.fitter->SetInitialRiseTime(10);
+        fitter.fitter->SetInitialDecayTime(100);
+        fitter.fitter->SetParametersToFit({1, 1, 1, 1, 1});
+        fitter.global_output_ = &output;
+        fitter.gpu_ = false;
+    }
+    for (int i = 0; i < 5; ++i)
+    {
+        fitter_vec[i].id_ = i;
+    }
+    fitter_vec[0].gpu_ = 0;
+    fitter_vec[2].gpu_ = 1;
+
+    std::vector<bool> first_batch(5, true);
+    std::vector<std::future<std::vector<mira::OutputData>>> future_vec(5);
+
+    auto switchFitter = [&fitter_vec, &future_vec, &first_batch]()
+    {
+        std::rotate(fitter_vec.begin(), fitter_vec.begin() + 1, fitter_vec.end());
+        std::rotate(future_vec.begin(), future_vec.begin() + 1, future_vec.end());
+        std::rotate(first_batch.begin(), first_batch.begin() + 1, first_batch.end());
+        future_vec.back() = std::async(&mira::FitterClass::Fit, fitter_vec.back());
+        first_batch.back() = false;
+        if (!first_batch[0])
         {
-            output.emplace_back(result);
+            std::cout << "fitter[" << fitter_vec.back().id_ << "] started. Waiting for fitter[" << fitter_vec[0].id_ << "]" << std::endl;
+            fitter_vec[0].Insert(future_vec[0].get());
+            first_batch[0] = true;
         }
+        std::cout << "fitter[" << fitter_vec[0].id_ << "] is ready" << std::endl;
     };
 
     for (const auto &evt : input)
@@ -43,25 +97,25 @@ void mira::gpufit_event_data(const std::vector<mira::EventData> &input, std::vec
             {
                 pulse.emplace_back((float)ch_data.waveform_[i]);
             }
-            ch_vec.emplace_back(ch_data.ch_);
-            efn_vec.emplace_back(ch_data.efn_);
-            event_id_vec.emplace_back(evt.event_id_);
-            ts_vec.emplace_back(evt.ts_);
-            if (fitter.AddPulse(pulse))
+            fitter_vec[0].ch_vec.emplace_back(ch_data.ch_);
+            fitter_vec[0].efn_vec.emplace_back(ch_data.efn_);
+            fitter_vec[0].event_id_vec.emplace_back(evt.event_id_);
+            fitter_vec[0].ts_vec.emplace_back(evt.ts_);
+            if (fitter_vec[0].fitter->AddPulse(pulse))
             {
-                gpuFit();
+                switchFitter();
             }
         }
     }
-    gpuFit();
-    for (int i = 0; i < output.size(); ++i)
+    switchFitter();
+    for (int i = 0; i < future_vec.size(); ++i)
     {
-        output[i].ch_ = ch_vec.at(i);
-        output[i].efn_ = efn_vec.at(i);
-        output[i].event_id_ = event_id_vec.at(i);
-        output[i].ts_ = ts_vec.at(i);
+        if (!first_batch[i])
+        {
+            std::cout << "Waiting for fitter[" << fitter_vec[i].id_ << "]" << std::endl;
+            fitter_vec[i].Insert(future_vec[i].get());
+        }
     }
-
     return;
 }
 
