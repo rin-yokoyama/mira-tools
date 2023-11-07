@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Chart } from 'react-google-charts';
 
@@ -68,7 +67,7 @@ export default function Waveform() {
             <label>Event id:
                 <input type="range" id="event_id" name="event_id" min="1" max={eventSize} defaultValue={1} onChange={handleChange}></input>
                 {sliderValue}
-            </label><br></br>
+            </label><br />
             <label>Channel:
                 <input type="number" id="chanel" name="channel" min="0" defaultValue={0} onChange={handleChChange}></input>
             </label>
