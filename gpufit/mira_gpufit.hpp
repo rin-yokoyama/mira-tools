@@ -17,10 +17,6 @@ namespace mira
         const int pool_size = 1,
         const int n_gpu = 1);
 
-    // void gpufit_event_data(const std::vector<mira::EventData> &input, std::vector<mira::OutputData> &output, const int batch_size = 10000);
-
-    // void gpufit_single_batch(const std::vector<mira::EventData> &input, std::vector<mira::OutputData> &output);
-
     /**
      * @brief Write output data contents to ofs in json format
      *
