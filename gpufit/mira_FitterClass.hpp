@@ -3,6 +3,7 @@
 
 #include "Interfaces/PulseFitInterface.hpp"
 #include "mira_decoder.hpp"
+#include "mira_constants.h"
 namespace mira
 {
     struct FitResult

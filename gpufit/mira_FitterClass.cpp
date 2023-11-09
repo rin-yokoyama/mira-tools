@@ -10,13 +10,14 @@ void mira::FitterClass::Init(int n_fits, int n_samples)
         fitter = nullptr;
     }
     n_fits_ = n_fits;
-    fitter = new PulseFitInterface(n_fits, n_samples, 1);
-    fitter->SetFitRange({400, 900});
-    fitter->SetPrepulseRange(200);
-    // fitter.fitter->SetInitialPeakTime(480);
-    fitter->SetInitialRiseTime(10);
-    fitter->SetInitialDecayTime(100);
-    fitter->SetParametersToFit({1, 1, 1, 1, 1});
+    fitter = new PulseFitInterface(n_fits, n_samples, mira::kChPolarityMap);
+    fitter->SetFitRange(mira::kPulseFitRange);
+    fitter->SetPrepulseRange(mira::kPrePulseRange);
+    if (mira::kInitialPeakTime > 0)
+        fitter->SetInitialPeakTime(mira::kInitialPeakTime);
+    fitter->SetInitialRiseTime(mira::kInitialRiseTime);
+    fitter->SetInitialDecayTime(mira::kInitialDecayTime);
+    fitter->SetParametersToFit(mira::kParametersToFit);
     Clear();
 }
 
@@ -66,7 +67,7 @@ void mira::FitterClass::FitSingleBatch(const std::vector<mira::EventData> &input
             efn_vec.emplace_back(ch_data.efn_);
             event_id_vec.emplace_back(evt.event_id_);
             ts_vec.emplace_back(evt.ts_);
-            fitter->AddPulse(pulse);
+            fitter->AddPulse(pulse, ch_data.ch_);
         }
     }
 
