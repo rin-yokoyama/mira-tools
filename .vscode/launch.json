@@ -10,7 +10,10 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/gpufit/gpufit_mira_dump",
             "args": [
-                "combined512.dat"
+                "combined512.dat",
+                "1",
+                "1",
+                "1"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/work",

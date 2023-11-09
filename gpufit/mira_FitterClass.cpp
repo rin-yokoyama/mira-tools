@@ -11,6 +11,7 @@ void mira::FitterClass::Init(int n_fits, int n_samples)
     }
     n_fits_ = n_fits;
     fitter = new PulseFitInterface(n_fits, n_samples, 1);
+    fitter->SetFitRange({400, 900});
     fitter->SetPrepulseRange(200);
     // fitter.fitter->SetInitialPeakTime(480);
     fitter->SetInitialRiseTime(10);
