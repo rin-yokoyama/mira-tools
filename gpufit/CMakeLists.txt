@@ -2,6 +2,7 @@ set(lib_name MiraGpufit)
 set(exec_name gpufit_mira_dump)
 
 add_library(${lib_name} SHARED
+    mira_FitterClass.cpp
     mira_gpufit.cpp
 )
 

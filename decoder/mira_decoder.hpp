@@ -43,7 +43,7 @@ namespace mira
      * @param val: header
      * @return data size in 4bytes
      */
-    u_int32_t get_size32(u_int32_t val)
+    inline u_int32_t get_size32(u_int32_t val)
     {
         return (val & mira::kDataSizeMask) / 2;
     }
@@ -54,7 +54,7 @@ namespace mira
      * @param segment_header
      * @return channel id
      */
-    int get_channel_id(u_int32_t segment_header)
+    inline int get_channel_id(u_int32_t segment_header)
     {
         return (segment_header & mira::kChannelIdMask) >> mira::kChannelIdShift;
     }

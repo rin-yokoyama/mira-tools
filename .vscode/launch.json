@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/gpufit/gpufit_mira_dump",
             "args": [
-                "bncpulserfirstdata.dat"
+                "combined512.dat"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/work",

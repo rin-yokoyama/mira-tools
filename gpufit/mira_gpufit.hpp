@@ -1,52 +1,25 @@
 #ifndef __MIRA_GPUFIT_HPP__
 #define __MIRA_GPUFIT_HPP__
 
-#include "Interfaces/PulseFitInterface.hpp"
-#include "mira_decoder.hpp"
 #include <thread>
 #include <future>
+#include "mira_FitterClass.hpp"
+#include "Interfaces/FitThreadPool.hpp"
+
 namespace mira
 {
-    struct FitResult
-    {
-        int index_;
-        std::vector<float> params_;
-        std::vector<float> init_params_;
-        float chi_squared_;
-        int state_;
-        int n_iterations_;
-    };
 
-    struct OutputData
-    {
-        mira::FitResult fit_result_;
-        int efn_;
-        int ch_;
-        int event_id_;
-        u_int64_t ts_;
-    };
-    class FitterClass
-    {
-    public:
-        FitterClass() {}
-        virtual ~FitterClass() {}
+    void gpufit_multithread(
+        const std::vector<mira::EventData> &input,
+        std::vector<mira::OutputData> &output,
+        const int n_threads = 1,
+        const int batch_size = 10000,
+        const int pool_size = 1,
+        const int n_gpu = 1);
 
-        std::vector<mira::OutputData> Fit();
-        void Clear();
-        void Insert(const std::vector<mira::OutputData> &output);
+    // void gpufit_event_data(const std::vector<mira::EventData> &input, std::vector<mira::OutputData> &output, const int batch_size = 10000);
 
-        int id_;
-        bool gpu_;
-        std::vector<mira::OutputData> *global_output_;
-        std::vector<mira::OutputData> output_;
-        PulseFitInterface *fitter;
-        std::vector<int> ch_vec;
-        std::vector<int> efn_vec;
-        std::vector<int> event_id_vec;
-        std::vector<u_int64_t> ts_vec;
-    };
-
-    void gpufit_event_data(const std::vector<mira::EventData> &input, std::vector<mira::OutputData> &output, const int batch_size = 10000);
+    // void gpufit_single_batch(const std::vector<mira::EventData> &input, std::vector<mira::OutputData> &output);
 
     /**
      * @brief Write output data contents to ofs in json format
