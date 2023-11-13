@@ -2,6 +2,7 @@
 #define __MIRA_FITTER_CLASS__
 
 #include "Interfaces/PulseFitInterface.hpp"
+#include "Interfaces/BGFitInterface.hpp"
 #include "mira_decoder.hpp"
 #include "mira_constants.h"
 namespace mira
@@ -32,12 +33,16 @@ namespace mira
         {
             fitter_id_ = static_id_++;
             global_output_ = output;
+            bg_range_ = {0, 0};
         }
         virtual ~FitterClass()
         {
             if (fitter)
                 delete fitter;
             fitter = nullptr;
+            if (bg_fitter_)
+                delete bg_fitter_;
+            bg_fitter_ = nullptr;
         }
 
         void Clear();
@@ -45,6 +50,10 @@ namespace mira
         void Insert();
         int GetId() const { return fitter_id_; }
         void FitSingleBatch(const std::vector<mira::EventData> &input);
+        void SetBGRange(const std::pair<int, int> &range)
+        {
+            bg_range_ = range;
+        }
 
         std::vector<mira::OutputData> *global_output_;
         std::vector<mira::OutputData> output_;
@@ -58,6 +67,8 @@ namespace mira
         static int static_id_;
         int fitter_id_;
         int n_fits_ = 0;
+        BGFitInterface *bg_fitter_ = nullptr;
+        std::pair<int, int> bg_range_;
     };
 };
 

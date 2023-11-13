@@ -75,10 +75,21 @@ void mira::write_event_data_to_json(std::ofstream &ofs, const std::vector<mira::
         {
             ofs << "{\"efn\": " << ch_data.efn_ << "," << std::endl;
             ofs << "\"channel\": " << ch_data.ch_ << "," << std::endl;
-            ofs << "\"waveform\": [";
-            for (int i = 0; i < ch_data.size_; ++i)
+            if (!ch_data.waveform_float_.empty())
             {
-                ofs << ch_data.waveform_[i] << ",";
+                ofs << "\"waveform\": [";
+                for (const auto &sample : ch_data.waveform_float_)
+                {
+                    ofs << sample << ",";
+                }
+            }
+            else
+            {
+                ofs << "\"waveform\": [";
+                for (int i = 0; i < ch_data.size_; ++i)
+                {
+                    ofs << ch_data.waveform_[i] << ",";
+                }
             }
             ofs.seekp(-1, std::ios_base::cur);
             ofs << "]},\n";

@@ -28,6 +28,7 @@ namespace mira
         int efn_ = -1;
         int size_ = 0;
         u_int16_t *waveform_ = nullptr;
+        std::vector<float> waveform_float_;
     };
 
     struct EventData
