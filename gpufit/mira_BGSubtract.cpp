@@ -23,7 +23,7 @@ std::vector<mira::BGSubtractedData> mira::subtract_bg(std::vector<mira::EventDat
     fitter.SetFitRange({range.first, range.second});
     fitter.SetInitialCycle(mira::kInitialBGCycle);
     fitter.SetParametersToFit({1, 1, 0, 0, 1});
-    std::vector<float> phase_vec;
+
     for (const auto &evt : input)
     {
         for (const auto &ch_data : evt.data_)
@@ -44,16 +44,18 @@ std::vector<mira::BGSubtractedData> mira::subtract_bg(std::vector<mira::EventDat
 
     fitter.PoolFit();
 
-    mira::OutputData result;
-    while (!fitter.ReadResults(
-        result.fit_result_.index_,
-        result.fit_result_.params_,
-        result.fit_result_.init_params_,
-        result.fit_result_.state_,
-        result.fit_result_.chi_squared_,
-        result.fit_result_.n_iterations_))
     {
-        phase_vec.emplace_back(result.fit_result_.params_[1]);
+        int index = 0;
+        while (!fitter.ReadResults(
+            output[index].fit.fit_result_.index_,
+            output[index].fit.fit_result_.params_,
+            output[index].fit.fit_result_.init_params_,
+            output[index].fit.fit_result_.state_,
+            output[index].fit.fit_result_.chi_squared_,
+            output[index].fit.fit_result_.n_iterations_))
+        {
+            ++index;
+        }
     }
 
     fitter.Clear();
@@ -61,22 +63,26 @@ std::vector<mira::BGSubtractedData> mira::subtract_bg(std::vector<mira::EventDat
     for (auto &data : output)
     {
         fitter.AddPulse(data.pulse, data.fit.ch_);
-        fitter.SetInitialParameters(data.fit.fit_result_.index_, data.fit.fit_result_.params_);
+        for (int i = 0; i < fitter.GetNParameters(); ++i)
+        {
+            fitter.SetInitialParameter(data.fit.fit_result_.index_, i, data.fit.fit_result_.params_[i]);
+        }
     }
 
     fitter.PoolFit();
-
-    while (!fitter.ReadResults(
-        result.fit_result_.index_,
-        result.fit_result_.params_,
-        result.fit_result_.init_params_,
-        result.fit_result_.state_,
-        result.fit_result_.chi_squared_,
-        result.fit_result_.n_iterations_))
     {
-        const auto index = result.fit_result_.index_;
-        fitter.SubtractBackground(output[index].pulse, result.fit_result_.params_);
-        output[index].fit.fit_result_ = result.fit_result_;
+        int index = 0;
+        while (!fitter.ReadResults(
+            output[index].fit.fit_result_.index_,
+            output[index].fit.fit_result_.params_,
+            output[index].fit.fit_result_.init_params_,
+            output[index].fit.fit_result_.state_,
+            output[index].fit.fit_result_.chi_squared_,
+            output[index].fit.fit_result_.n_iterations_))
+        {
+            fitter.SubtractBackground(output[index].pulse, output[index].fit.fit_result_.params_);
+            ++index;
+        }
     }
 
     return output;

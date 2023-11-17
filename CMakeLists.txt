@@ -14,6 +14,7 @@ if(BUILD_GPUFIT)
     add_subdirectory(gpufit)
 endif()
 
+add_subdirectory(CuPy)
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/thismira-tools.sh.in"
     "${CMAKE_SOURCE_DIR}/thismira-tools.sh"

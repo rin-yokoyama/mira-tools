@@ -6,3 +6,6 @@
 /viewer/node_modules
 /viewer/dist
 /viewer/.parcel-cache
+
+*.png
+*.pdf

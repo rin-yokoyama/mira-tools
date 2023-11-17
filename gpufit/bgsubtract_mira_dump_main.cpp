@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     u_int32_t *buf32 = (u_int32_t *)buffer;
     std::cout << "reading data file..." << std::endl;
     auto data = mira::decode_buffer(buf32, size / (u_int64_t)4, mira::kChannelsToProcess);
-    auto subtracted_data = mira::subtract_bg(data, {0, 400});
+    auto subtracted_data = mira::subtract_bg(data, {0, 1000});
 
     std::cout << "writing data to subtracted_output.json..." << std::endl;
     std::ofstream ofs("subtracted_output.json");
