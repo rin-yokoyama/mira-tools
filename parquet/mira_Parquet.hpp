@@ -12,6 +12,8 @@ namespace mira
     arrow::MemoryPool *pool = nullptr;
     std::shared_ptr<arrow::Table> generate_table(const std::vector<mira::EventData> &data);
     void wirte_parquet_file(std::string file_name, std::shared_ptr<arrow::Table> table);
+
+    void test();
 }
 
 #endif /*__MIRA_PARQUET_HPP__*/

@@ -5,6 +5,7 @@
 
 int main(int argc, char **argv)
 {
+
     if (argc < 2)
     {
         std::cout << "Usage: decode_mira_data [input_file.dat]" << std::endl;
@@ -24,5 +25,6 @@ int main(int argc, char **argv)
 
     auto table = mira::generate_table(data);
     mira::wirte_parquet_file("output.parquet", table);
+
     return 0;
 }
