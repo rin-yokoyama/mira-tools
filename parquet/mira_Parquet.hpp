@@ -2,8 +2,11 @@
 #define __MIRA_PARQUET_HPP__
 #include <iostream>
 #include <arrow/api.h>
-#include <parquet/arrow/writer.h>
 #include <arrow/io/api.h>
+#include <arrow/pretty_print.h>
+#include <arrow/record_batch.h>
+#include <arrow/type.h>
+#include <parquet/arrow/writer.h>
 #include <vector>
 #include "mira_decoder.hpp"
 
