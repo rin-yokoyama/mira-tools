@@ -1,0 +1,6 @@
+add_executable(testConsumer testConsumer.cpp)
+target_link_libraries(testConsumer rdkafka)
+
+add_executable(stream_decoder decode_stream_data_main.cpp)
+target_include_directories(stream_decoder PRIVATE ${CMAKE_SOURCE_DIR}/decoder)
+target_link_libraries(stream_decoder rdkafka MiraDecoder)

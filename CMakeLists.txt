@@ -21,4 +21,6 @@ configure_file(
     @ONLY
 )
 
+add_subdirectory(streaming)
+
 install(FILES ${CMAKE_SOURCE_DIR}/thismira-tools.sh DESTINATION bin)

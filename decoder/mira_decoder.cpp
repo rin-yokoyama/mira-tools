@@ -1,4 +1,5 @@
 #include "mira_decoder.hpp"
+#include <sstream>
 
 mira::EventData mira::decode_an_event(u_int32_t *buf, const std::vector<int> &ch_flags)
 {
@@ -64,6 +65,12 @@ std::vector<mira::EventData> mira::decode_buffer(u_int32_t *buf, u_int32_t size,
 
 void mira::write_event_data_to_json(std::ofstream &ofs, const std::vector<mira::EventData> &data)
 {
+    ofs << event_data_to_json(data);
+}
+
+std::string mira::event_data_to_json(const std::vector<mira::EventData> &data)
+{
+    std::ostringstream ofs;
     ofs << "[" << std::endl;
     for (const auto &evt : data)
     {
@@ -99,4 +106,6 @@ void mira::write_event_data_to_json(std::ofstream &ofs, const std::vector<mira::
     }
     ofs.seekp(-2, std::ios_base::cur);
     ofs << "\n]" << std::endl;
+
+    return ofs.str();
 }

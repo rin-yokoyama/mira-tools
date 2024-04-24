@@ -86,6 +86,13 @@ namespace mira
      * @param data: a vector of decoded data
      */
     void write_event_data_to_json(std::ofstream &ofs, const std::vector<mira::EventData> &data);
+
+    /**
+     * @brief convert event data contents to string in json format
+     *
+     * @param data: a vector of decoded data
+     */
+    std::string event_data_to_json(const std::vector<mira::EventData> &data);
 }
 
 #endif /*__MIRA_DECODER_HPP__*/
