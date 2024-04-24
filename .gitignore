@@ -7,5 +7,6 @@
 /viewer/dist
 /viewer/.parcel-cache
 
+thismira-tools.sh
 *.png
 *.pdf
