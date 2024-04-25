@@ -67,7 +67,7 @@ namespace mira
      * @param ch_flags: channel ids to read
      * @return int
      */
-    mira::EventData decode_an_event(u_int32_t *buf, const std::vector<int> &ch_flags);
+    mira::EventData decode_an_event(u_int32_t *buf, u_int32_t &size, const std::vector<int> &ch_flags);
 
     /**
      * @brief Docode a data block containing multiple event data

@@ -115,7 +115,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/decoder/decode_mira_dump",
             "args": [
-                "bncpulserfirstdata.dat"
+                "/home/daq/mira/test.dat"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/work",

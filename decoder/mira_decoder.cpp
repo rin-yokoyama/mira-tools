@@ -1,7 +1,7 @@
 #include "mira_decoder.hpp"
 #include <sstream>
 
-mira::EventData mira::decode_an_event(u_int32_t *buf, const std::vector<int> &ch_flags)
+mira::EventData mira::decode_an_event(u_int32_t *buf, u_int32_t &size, const std::vector<int> &ch_flags)
 {
     int idx = -1;
     auto next = [&buf, &idx]()
@@ -19,10 +19,13 @@ mira::EventData mira::decode_an_event(u_int32_t *buf, const std::vector<int> &ch
     eventData.ts_ = ts;
     eventData.data_.clear();
 
-    while (idx < event_size)
+    while (idx < event_size - 1)
     {
         const auto segment_size = mira::get_size32(next());
         if (!segment_size)
+            break;
+        const auto end = idx + segment_size - 1;
+        if (end > event_size - 1)
             break;
         addr = next();
         const auto segment_header = next();
@@ -42,6 +45,7 @@ mira::EventData mira::decode_an_event(u_int32_t *buf, const std::vector<int> &ch
             skip(segment_size - 3);
         }
     }
+    size = size + event_size;
     return eventData;
 }
 
@@ -57,7 +61,11 @@ std::vector<mira::EventData> mira::decode_buffer(u_int32_t *buf, u_int32_t size,
         if (!event_size)
             break;
         const u_int32_t addr = buf[idx + 1];
-        buff_data.emplace_back(mira::decode_an_event(buf + idx + 2, ch_flags));
+        u_int32_t idx_evnt = 2;
+        while (idx_evnt < event_size - 1)
+        {
+            buff_data.emplace_back(mira::decode_an_event(buf + idx + idx_evnt, idx_evnt, ch_flags));
+        }
         idx = idx + event_size;
     }
     return buff_data;
