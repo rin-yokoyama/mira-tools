@@ -6,7 +6,7 @@ int main(int argc, char **argv)
     if (argc < 2)
     {
 
-        std::cout << "Usage: gpufit_mira_data [input_file.dat]" << std::endl;
+        std::cout << "Usage: gpufit_mira_data [input_file.dat] [n_threads] [n_pool] [n_gpu]" << std::endl;
         return 1;
     }
 
@@ -26,16 +26,11 @@ int main(int argc, char **argv)
     u_int32_t *buf32 = (u_int32_t *)buffer;
     std::cout << "reading data file..." << std::endl;
     auto data = mira::decode_buffer(buf32, size / (u_int64_t)4, {0});
-    std::vector<mira::EventData> data_dupl;
-    for (int i = 0; i < 4; ++i)
-    {
-        data_dupl.insert(data_dupl.end(), data.begin(), data.end());
-    }
 
     std::vector<mira::OutputData> output_vec;
     std::cout << "fitting started..." << std::endl;
     std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
-    mira::gpufit_multithread(data_dupl, output_vec, n_threads, 10000, n_pool, n_gpu);
+    mira::gpufit_multithread(data, output_vec, n_threads, mira::kNFitAtOnce, n_pool, n_gpu);
     std::chrono::milliseconds::rep const dt_gpufit = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
     std::cout << "gpufit in " << static_cast<double>(dt_gpufit) / 1000. << " sec" << std::endl;
     std::cout << "output_vec.size() = " << output_vec.size() << std::endl;

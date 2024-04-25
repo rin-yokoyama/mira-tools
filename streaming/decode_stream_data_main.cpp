@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include "mira_decoder.hpp"
+#include "mira_constants.h"
 #include <librdkafka/rdkafka.h>
 
 int main(int argc, char **argv)
@@ -49,12 +50,26 @@ int main(int argc, char **argv)
             }
             u_int64_t size = rkmessage->len;
             u_int32_t *buf32 = (u_int32_t *)rkmessage->payload;
-            auto data = mira::decode_buffer(buf32, size / 4, {0, 1, 2, 3, 4});
+            rd_kafka_message_destroy(rkmessage);
+            auto data = mira::decode_buffer(buf32, size / 4, mira::kChannelsToProcess);
 
             auto json_data = mira::event_data_to_json(data);
-            std::cout << json_data << std::endl;
+            // std::cout << json_data << std::endl;
 
-            rd_kafka_message_destroy(rkmessage);
+            // send json_data
+            rd_kafka_conf_t *conf_p = rd_kafka_conf_new();
+            rd_kafka_conf_set(conf_p, "client.id", client_id.c_str(), errstr, sizeof(errstr));
+            rd_kafka_conf_set(conf_p, "bootstrap.servers", bootstrap_servers.c_str(), errstr, sizeof(errstr));
+            rd_kafka_topic_conf_t *topic_conf = rd_kafka_topic_conf_new();
+            rd_kafka_t *rk_p;
+            rd_kafka_topic_t *topics_p = rd_kafka_topic_new(rk_p, "decoded", topic_conf);
+            {
+                void *payload = (void *)json_data.c_str();
+                void *key;
+                size_t payload_len = json_data.size();
+                size_t keylen = 0;
+                rd_kafka_produce(topics_p, RD_KAFKA_PARTITION_UA, RD_KAFKA_MSG_F_COPY, payload, payload_len, NULL, keylen, NULL);
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 #ifndef __MIRA_CONSTANTS__
 #define __MIRA_CONSTANTS__
 
+#include <cmath>
 #include <vector>
 #include <map>
 
@@ -12,7 +13,8 @@ namespace mira
     const std::vector<int> kBGParametersToFit = {1, 1, 0, 0, 1};
 
     // Constants for fitting
-    const std::vector<int> kPulseFitRange = {400, 600};
+    const int kNFitAtOnce = 10000;
+    const std::vector<int> kPulseFitRange = {12, 512};
     const int kPrePulseRange = 200;
     const float kInitialPeakTime = -1; // negative value for auto detect
     const float kInitialRiseTime = 10;

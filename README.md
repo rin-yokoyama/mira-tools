@@ -21,6 +21,12 @@ cd viewer
 npm install
 npm start
 ```
+## parquet
+Requires libarrow-dev libparquet-dev
+
+## streaming
+Requires librdafka-dev libjansson-dev
+
 ## dependencies
 confirmed working on NVIDIA Jetson Orin Nano
 - Ubuntu 20.04 / gcc 9.4.0 / cmake 3.27.7 / node.js 20.9.0 / CUDA 11.4 / ARMv8 rev1 CPU / NVIDIA 229e rev a1 GPU
