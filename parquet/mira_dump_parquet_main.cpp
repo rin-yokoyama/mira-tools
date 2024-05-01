@@ -23,8 +23,9 @@ int main(int argc, char **argv)
     u_int32_t *buf32 = (u_int32_t *)buffer;
     auto data = mira::decode_buffer(buf32, size / 4, {0, 1, 2, 3, 4});
 
-    auto table = mira::generate_table(data);
-    mira::wirte_parquet_file("output.parquet", table);
+    mira::RawDataWriter writer;
+    auto table = writer.GenerateTable(data);
+    writer.WriteParquetFile("output.parquet", table);
 
     return 0;
 }

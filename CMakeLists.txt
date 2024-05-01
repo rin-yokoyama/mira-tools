@@ -20,6 +20,7 @@ endif()
 
 if(BUILD_PARQUET)
     add_subdirectory(parquet)
+    add_subdirectory(streaming)
 endif()
 
 #add_subdirectory(CuPy)
@@ -29,6 +30,5 @@ configure_file(
     @ONLY
 )
 
-add_subdirectory(streaming)
 
 install(FILES ${CMAKE_SOURCE_DIR}/thismira-tools.sh DESTINATION bin)
