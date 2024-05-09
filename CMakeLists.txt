@@ -16,6 +16,7 @@ option(BUILD_PARQUET "Build parquet output" ON)
 if(BUILD_GPUFIT)
     set(GPUFIT_INSTALL_PATH $ENV{HOME}/opt/Gpufit CACHE PATH "Gpufit")
     add_subdirectory(gpufit)
+    set(GPUFIT ON)
 endif()
 
 if(BUILD_PARQUET)

@@ -88,3 +88,16 @@ void mira::RawDataWriter::WriteParquetFile(std::string name, std::shared_ptr<arr
     PARQUET_THROW_NOT_OK(
         parquet::arrow::WriteTable(*table, pool, outfile));
 }
+
+std::shared_ptr<arrow::Buffer> mira::RawDataWriter::WriteStream(std::shared_ptr<arrow::Table> table)
+{
+    // std::shared_ptr<arrow::io::BufferOutputStream> sink;
+    auto sink = arrow::io::BufferOutputStream::Create().ValueOrDie();
+    arrow::TableBatchReader reader(table);
+    std::shared_ptr<arrow::RecordBatch> batch;
+    reader.ReadNext(&batch);
+    auto writer = arrow::ipc::MakeStreamWriter(sink, schema_).ValueOrDie();
+    writer->WriteRecordBatch(*batch.get());
+    writer->Close();
+    return *sink->Finish();
+}

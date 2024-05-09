@@ -1,29 +1,36 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "mira_constants.h"
 #include "mira_decoder.hpp"
 #include "mira_streaming.hpp"
 #include "mira_Parquet.hpp"
+#include "mira_gpufit.hpp"
 
 int main(int argc, char **argv)
 {
     if (argc < 3)
     {
-        std::cout << "Usage: file2stream [input_file.dat] [bootstrap.servers] [client.id (=0)]" << std::endl;
+        std::cout << "Usage: file2stream [input_file.dat] [bootstrap.servers] [nevents_per_buff(=100)] [client.id (=0)]" << std::endl;
         return 1;
     }
     const std::string ifname = argv[1];
     const std::string bootstrap_servers = argv[2];
     std::string client_id("0");
+    int neve = 100;
     if (argc > 3)
     {
-        client_id = argv[3];
+        neve = std::stoi(argv[3]);
+    }
+    if (argc > 4)
+    {
+        client_id = argv[4];
     }
 
     auto topic = mira::init_producer(client_id, bootstrap_servers, "decoded");
     mira::RawDataWriter writer;
 
-    const int kNEventsPerBuff = 1;
+    const int kNEventsPerBuff = neve;
     std::ifstream ifs(ifname, std::ios::binary);
     ifs.seekg(0, std::ios::end);
     auto size = ifs.tellg();
@@ -47,9 +54,9 @@ int main(int argc, char **argv)
             ifs.read(buffer, buffsize);
             u_int32_t *buf32 = (u_int32_t *)buffer;
             auto data = mira::decode_buffer(buf32, buffsize / 4, mira::kChannelsToProcess);
-            // auto json_data = mira::event_data_to_json(data);
-            //  std::cout << json_data << std::endl;
-            // mira::produce(topic, sizeof(json_data.c_str()), (void *)json_data.c_str());
+
+            std::vector<mira::OutputData> output_vec;
+            mira::gpufit_multithread(data, output_vec, mira::kNThreads, mira::kNFitAtOnce, mira::kNGpu + mira::kNCpu, mira::kNGpu);
 
             auto table = writer.GenerateTable(data);
             auto stream = writer.WriteStream(table);

@@ -14,7 +14,10 @@
 namespace mira
 {
     arrow::MemoryPool *pool = nullptr;
-
+    /**
+     * @brief Class for writing Apache Arrow data to a file or buffer stream.
+     *
+     */
     class RawDataWriter
     {
     public:
@@ -24,6 +27,7 @@ namespace mira
         std::shared_ptr<arrow::Table> GenerateTable(const std::vector<mira::EventData> &data);
         std::shared_ptr<arrow::RecordBatch> GenerateRecordBatch(const std::vector<mira::EventData> &data);
         void WriteParquetFile(std::string name, std::shared_ptr<arrow::Table> table);
+        std::shared_ptr<arrow::Buffer> WriteStream(std::shared_ptr<arrow::Table> table);
 
     protected:
         void Fill(const std::vector<mira::EventData> &data);
@@ -38,6 +42,7 @@ namespace mira
         std::shared_ptr<arrow::ListBuilder> list_builder_;
         std::shared_ptr<arrow::Schema> schema_;
     };
+
 }
 
 #endif /*__MIRA_PARQUET_HPP__*/
