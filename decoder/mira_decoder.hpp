@@ -15,6 +15,8 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <numeric>
+#include "mira_constants.h"
 
 namespace mira
 {
@@ -27,6 +29,8 @@ namespace mira
         int ch_ = -1;
         int efn_ = -1;
         int size_ = 0;
+        int qdc_ = 0;
+        int adc_ = 0;
         u_int16_t *waveform_ = nullptr;
         std::vector<float> waveform_float_;
     };
@@ -37,6 +41,38 @@ namespace mira
         u_int32_t event_id_ = 0;
         std::vector<mira::ChannelData> data_;
     };
+
+    /**
+     * @brief Calulate ADC (Max sample value)
+     *
+     * @param waveform : waveform vector
+     * @return double : maximum element, baseline subtracted.
+     */
+    inline double calculate_adc(const std::vector<float> &waveform)
+    {
+        if (waveform.empty())
+            return 0;
+        const int pre = waveform.size() * mira::kPrePulseRatio;
+        const double ave = std::accumulate(waveform.begin(), waveform.begin() + pre, 0.0f) / pre;
+        return *std::max_element(waveform.begin(), waveform.end()) - ave;
+    }
+
+    /**
+     * @brief Calculate QDC (Average value of the waveform samples between kPrePulseRatio and kAfterPulesRatio)
+     *
+     * @param waveform : waveform vector
+     * @return double : qdc, baseline subtracted.
+     */
+    inline double calculate_qdc(const std::vector<float> &waveform)
+    {
+        if (waveform.empty())
+            return 0;
+        const int pre = waveform.size() * mira::kPrePulseRatio;
+        const int after = waveform.size() * mira::kAfterPulseRatio;
+        const double ave = std::accumulate(waveform.begin() + pre, waveform.begin() + after, 0.0f) / (after - pre);
+        const double ave_pre = std::accumulate(waveform.begin(), waveform.begin() + pre, 0.0f) / pre;
+        return ave - ave_pre;
+    }
 
     /**
      * @brief Get the data size from a ridf header

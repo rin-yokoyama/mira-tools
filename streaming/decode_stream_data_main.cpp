@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     }
     std::string bootstrap_servers = argv[1];
     std::string client_id = "0";
-    if (argc > 1)
+    if (argc > 2)
     {
         client_id = argv[2];
     }

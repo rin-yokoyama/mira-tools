@@ -36,6 +36,8 @@ namespace mira
         std::shared_ptr<arrow::Int64Builder> ts_builder_;
         std::shared_ptr<arrow::Int32Builder> efn_builder_;
         std::shared_ptr<arrow::Int32Builder> channel_builder_;
+        std::shared_ptr<arrow::FloatBuilder> qdc_builder_;
+        std::shared_ptr<arrow::FloatBuilder> adc_builder_;
         std::shared_ptr<arrow::FloatBuilder> sample_builder_;
         std::shared_ptr<arrow::ListBuilder> waveform_builder_;
         std::shared_ptr<arrow::StructBuilder> struct_builder_;

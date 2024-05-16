@@ -33,10 +33,17 @@ mira::EventData mira::decode_an_event(u_int32_t *buf, u_int32_t &size, const std
         if (std::find(ch_flags.begin(), ch_flags.end(), channel_id) != ch_flags.end())
         {
             ChannelData data;
+            void *array = buf + idx + 1;
             data.ch_ = channel_id;
             data.efn_ = addr;
             data.size_ = 2 * (segment_size - 3);
-            data.waveform_ = (u_int16_t *)(buf + idx + 1);
+            data.waveform_ = (u_int16_t *)(array);
+            if (mira::kQDCADCFlag)
+            {
+                data.waveform_float_.insert(data.waveform_float_.end(), (float *)array, ((float *)array) + data.size_);
+                data.qdc_ = mira::calculate_qdc(data.waveform_float_);
+                data.adc_ = mira::calculate_adc(data.waveform_float_);
+            }
             eventData.data_.emplace_back(data);
             skip(segment_size - 3);
         }
@@ -90,6 +97,11 @@ std::string mira::event_data_to_json(const std::vector<mira::EventData> &data)
         {
             ofs << "{\"efn\": " << ch_data.efn_ << "," << std::endl;
             ofs << "\"channel\": " << ch_data.ch_ << "," << std::endl;
+            if (mira::kQDCADCFlag)
+            {
+                ofs << "\"qdc\": " << ch_data.qdc_ << "," << std::endl;
+                ofs << "\"adc\": " << ch_data.adc_ << "," << std::endl;
+            }
             if (!ch_data.waveform_float_.empty())
             {
                 ofs << "\"waveform\": [";

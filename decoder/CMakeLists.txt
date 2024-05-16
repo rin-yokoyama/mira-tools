@@ -3,6 +3,7 @@ set(lib_name MiraDecoder)
 add_library(${lib_name} SHARED
     mira_decoder.cpp
 )
+target_include_directories(${lib_name} PRIVATE ${CMAKE_SOURCE_DIR})
 
 install(TARGETS ${lib_name}
     DESTINATION lib

@@ -9,12 +9,22 @@ mira::RawDataWriter::RawDataWriter()
     auto efn_field = arrow::field("efn", arrow::int32());
     auto ch_field = arrow::field("ch", arrow::int32());
     auto waveform_field = arrow::field("waveform", arrow::list(arrow::float32())); // 'c' is a list of floats
-    struct_type_ = arrow::struct_({efn_field, ch_field, waveform_field});
+    auto qdc_field = arrow::field("qdc", arrow::float32());
+    auto adc_field = arrow::field("adc", arrow::float32());
+    if (mira::kQDCADCFlag)
+    {
+        struct_type_ = arrow::struct_({efn_field, ch_field, waveform_field, qdc_field, adc_field});
+    }
+    else
+    {
+        struct_type_ = arrow::struct_({efn_field, ch_field, waveform_field});
+    }
 
     // Define schema
     schema_ = arrow::schema({arrow::field("event_id", arrow::int32()),
                              arrow::field("ts", arrow::int64()),
                              arrow::field("data", arrow::list(struct_type_))});
+
     // Define Arrow builders
     event_id_builder_ = std::make_shared<arrow::Int32Builder>(pool_);
     ts_builder_ = std::make_shared<arrow::Int64Builder>(pool_);
@@ -22,10 +32,17 @@ mira::RawDataWriter::RawDataWriter()
     channel_builder_ = std::make_shared<arrow::Int32Builder>(pool_);
     sample_builder_ = std::make_shared<arrow::FloatBuilder>(pool_);
     waveform_builder_ = std::make_shared<arrow::ListBuilder>(pool_, sample_builder_);
+    qdc_builder_ = std::make_shared<arrow::FloatBuilder>(pool_);
+    adc_builder_ = std::make_shared<arrow::FloatBuilder>(pool_);
     std::vector<std::shared_ptr<arrow::ArrayBuilder>> field_builders;
     field_builders.emplace_back(efn_builder_);
     field_builders.emplace_back(channel_builder_);
     field_builders.emplace_back(waveform_builder_);
+    if (mira::kQDCADCFlag)
+    {
+        field_builders.emplace_back(qdc_builder_);
+        field_builders.emplace_back(adc_builder_);
+    }
     struct_builder_ = std::make_shared<arrow::StructBuilder>(struct_type_, pool_, field_builders);
     list_builder_ = std::make_shared<arrow::ListBuilder>(pool_, struct_builder_);
 }
@@ -47,6 +64,11 @@ void mira::RawDataWriter::Fill(const std::vector<mira::EventData> &data)
             for (int i = 0; i < ch.size_; ++i)
             {
                 PARQUET_THROW_NOT_OK(sample_builder_->Append(ch.waveform_[i]));
+            }
+            if (mira::kQDCADCFlag)
+            {
+                PARQUET_THROW_NOT_OK(static_cast<arrow::FloatBuilder *>(struct_builder_->field_builder(3))->Append(ch.qdc_));
+                PARQUET_THROW_NOT_OK(static_cast<arrow::FloatBuilder *>(struct_builder_->field_builder(4))->Append(ch.adc_));
             }
         }
     }

@@ -7,6 +7,11 @@
 
 namespace mira
 {
+    // Constants for QDC/ADC
+    const bool kQDCADCFlag = true;
+    const float kPrePulseRatio = 0.1;
+    const float kAfterPulseRatio = 0.7;
+
     // Constants for background subtraction
     const std::pair<int, int> kBGFitRange = {0, 0};
     const float kInitialBGCycle = 168. / (2. * M_PI);

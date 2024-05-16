@@ -5,6 +5,59 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "stream_decoder",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/streaming/stream_decoder",
+            "args": [
+                "192.168.0.2:9092,192.168.0.9:9092"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "stream_fitter",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/streaming/stream_fitter",
+            "args": [
+                "192.168.0.2:9092,192.168.0.9:9092",
+                "10"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "file2stream",
             "type": "cppdbg",
             "request": "launch",
