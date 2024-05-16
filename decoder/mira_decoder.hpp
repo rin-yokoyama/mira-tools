@@ -32,7 +32,7 @@ namespace mira
         int qdc_ = 0;
         int adc_ = 0;
         u_int16_t *waveform_ = nullptr;
-        std::vector<float> waveform_float_;
+        std::vector<u_int16_t> waveform_vec_;
     };
 
     struct EventData
@@ -48,7 +48,7 @@ namespace mira
      * @param waveform : waveform vector
      * @return double : maximum element, baseline subtracted.
      */
-    inline double calculate_adc(const std::vector<float> &waveform)
+    inline double calculate_adc(const std::vector<u_int16_t> &waveform)
     {
         if (waveform.empty())
             return 0;
@@ -63,7 +63,7 @@ namespace mira
      * @param waveform : waveform vector
      * @return double : qdc, baseline subtracted.
      */
-    inline double calculate_qdc(const std::vector<float> &waveform)
+    inline double calculate_qdc(const std::vector<u_int16_t> &waveform)
     {
         if (waveform.empty())
             return 0;
