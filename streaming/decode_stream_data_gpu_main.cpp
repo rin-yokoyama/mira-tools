@@ -25,29 +25,33 @@ int main(int argc, char **argv)
     }
 
     auto topic = mira::init_producer(client_id, bootstrap_servers, "fitdata");
-    mira::RawDataWriter writer;
+    mira::FitDataWriter writer;
     std::vector<mira::EventData> data_vec;
     int batch_count = 0;
+    char longbuff[20824 * 100];
+    size_t lb_size = 0;
 
-    auto gpufit = [&writer, &topic, &data_vec, &batch_count, &batch_size](size_t len, void *buff)
+    auto gpufit = [&writer, &topic, &batch_count, &batch_size, &longbuff, &lb_size](size_t len, void *buff)
     {
         ++batch_count;
-        const u_int64_t size = len;
-        const auto buf32 = (u_int32_t *)buff;
-        auto data = mira::decode_buffer(buf32, size / 4, mira::kChannelsToProcess);
+        std::memcpy(&longbuff[lb_size], buff, len);
+        lb_size += len;
         if (batch_count < batch_size)
-        {
-            data_vec.insert(data_vec.end(), data.begin(), data.end());
-        }
-        else
-        {
-            std::vector<mira::OutputData> output_vec;
-            mira::gpufit_multithread(data, output_vec, mira::kNThreads, mira::kNFitAtOnce, mira::kNGpu + mira::kNCpu, mira::kNGpu);
+            return;
+        const u_int64_t size = lb_size;
+        const auto buf32 = (u_int32_t *)longbuff;
+        auto data = mira::decode_buffer(buf32, size / 4, mira::kChannelsToProcess);
+        std::vector<mira::OutputData> output_vec;
+        mira::gpufit_multithread(data, output_vec, mira::kNThreads, mira::kNFitAtOnce, mira::kNGpu + mira::kNCpu, mira::kNGpu);
 
-            auto table = writer.GenerateTable(data);
-            auto stream = writer.WriteStream(table);
+        std::cout << "output size = " << output_vec.size() << std::endl;
+
+        auto table = writer.GenerateTable(output_vec);
+        auto stream = writer.WriteStream(table);
+        if (stream->size() > 0)
             mira::produce(topic, stream->size(), (void *)stream->data());
-        }
+        lb_size = 0;
+        batch_count = 0;
     };
 
     mira::polling_loop(client_id, bootstrap_servers, "fitter", "rawdata", gpufit);

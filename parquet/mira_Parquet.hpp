@@ -13,7 +13,6 @@
 
 namespace mira
 {
-    arrow::MemoryPool *pool = nullptr;
     /**
      * @brief Class for writing Apache Arrow data to a file or buffer stream.
      *
@@ -30,6 +29,7 @@ namespace mira
         std::shared_ptr<arrow::Buffer> WriteStream(std::shared_ptr<arrow::Table> table);
 
     protected:
+        arrow::MemoryPool *pool_ = nullptr;
         void Fill(const std::vector<mira::EventData> &data);
         std::shared_ptr<arrow::DataType> struct_type_;
         std::shared_ptr<arrow::Int32Builder> event_id_builder_;

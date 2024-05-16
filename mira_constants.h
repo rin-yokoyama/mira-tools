@@ -8,20 +8,20 @@
 namespace mira
 {
     // Constants for background subtraction
-    const std::pair<int, int> kBGFitRange = {0, 400};
+    const std::pair<int, int> kBGFitRange = {0, 0};
     const float kInitialBGCycle = 168. / (2. * M_PI);
     const std::vector<int> kBGParametersToFit = {1, 1, 0, 0, 1};
 
     // Constants for fitting
-    const int kNFitAtOnce = 1000;
+    const int kNFitAtOnce = 10000;
     const int kNThreads = 2;
     const int kNGpu = 1;
     const int kNCpu = 0;
     const std::vector<int> kPulseFitRange = {10, 210};
     const int kPrePulseRange = 70;
-    const float kInitialPeakTime = -1; // negative value for auto detect
+    const float kInitialPeakTime = 85; // negative value for auto detect
     const float kInitialRiseTime = 1;
-    const float kInitialDecayTime = 10;
+    const float kInitialDecayTime = 5;
 
     const std::vector<int> kChannelsToProcess = {0, 1, 2, 3, 4};
 

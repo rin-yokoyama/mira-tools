@@ -15,7 +15,6 @@
 
 namespace mira
 {
-    arrow::MemoryPool *pool = nullptr;
     /**
      * @brief Class for writing Apache Arrow data to a file or buffer stream.
      *

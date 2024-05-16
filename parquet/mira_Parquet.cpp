@@ -3,7 +3,7 @@
 mira::RawDataWriter::RawDataWriter()
 {
     // Define the memory pool
-    pool = arrow::default_memory_pool();
+    pool_ = arrow::default_memory_pool();
 
     // Define the structure for the inner list items
     auto efn_field = arrow::field("efn", arrow::int32());
@@ -16,18 +16,18 @@ mira::RawDataWriter::RawDataWriter()
                              arrow::field("ts", arrow::int64()),
                              arrow::field("data", arrow::list(struct_type_))});
     // Define Arrow builders
-    event_id_builder_ = std::make_shared<arrow::Int32Builder>(pool);
-    ts_builder_ = std::make_shared<arrow::Int64Builder>(pool);
-    efn_builder_ = std::make_shared<arrow::Int32Builder>(pool);
-    channel_builder_ = std::make_shared<arrow::Int32Builder>(pool);
-    sample_builder_ = std::make_shared<arrow::FloatBuilder>(pool);
-    waveform_builder_ = std::make_shared<arrow::ListBuilder>(pool, sample_builder_);
+    event_id_builder_ = std::make_shared<arrow::Int32Builder>(pool_);
+    ts_builder_ = std::make_shared<arrow::Int64Builder>(pool_);
+    efn_builder_ = std::make_shared<arrow::Int32Builder>(pool_);
+    channel_builder_ = std::make_shared<arrow::Int32Builder>(pool_);
+    sample_builder_ = std::make_shared<arrow::FloatBuilder>(pool_);
+    waveform_builder_ = std::make_shared<arrow::ListBuilder>(pool_, sample_builder_);
     std::vector<std::shared_ptr<arrow::ArrayBuilder>> field_builders;
     field_builders.emplace_back(efn_builder_);
     field_builders.emplace_back(channel_builder_);
     field_builders.emplace_back(waveform_builder_);
-    struct_builder_ = std::make_shared<arrow::StructBuilder>(struct_type_, pool, field_builders);
-    list_builder_ = std::make_shared<arrow::ListBuilder>(pool, struct_builder_);
+    struct_builder_ = std::make_shared<arrow::StructBuilder>(struct_type_, pool_, field_builders);
+    list_builder_ = std::make_shared<arrow::ListBuilder>(pool_, struct_builder_);
 }
 
 void mira::RawDataWriter::Fill(const std::vector<mira::EventData> &data)
@@ -86,7 +86,7 @@ void mira::RawDataWriter::WriteParquetFile(std::string name, std::shared_ptr<arr
         arrow::io::FileOutputStream::Open(name));
 
     PARQUET_THROW_NOT_OK(
-        parquet::arrow::WriteTable(*table, pool, outfile));
+        parquet::arrow::WriteTable(*table, pool_, outfile));
 }
 
 std::shared_ptr<arrow::Buffer> mira::RawDataWriter::WriteStream(std::shared_ptr<arrow::Table> table)

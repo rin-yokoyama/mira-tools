@@ -64,24 +64,28 @@ void mira::FitterClass::FitSingleBatch(const std::vector<mira::EventData> &input
         Init(n_fits, n_samples);
     }
 
-    for (const auto &evt : input)
+    if (bg_fitter_)
     {
-        for (const auto &ch_data : evt.data_)
+        for (const auto &evt : input)
         {
-            std::vector<float> pulse;
-            for (int i = 0; i < ch_data.size_; ++i)
+            for (const auto &ch_data : evt.data_)
             {
-                pulse.emplace_back((float)ch_data.waveform_[i]);
+                std::vector<float> pulse;
+                if (!ch_data.size_)
+                    continue;
+                for (int i = 0; i < ch_data.size_; ++i)
+                {
+                    pulse.emplace_back((float)ch_data.waveform_[i]);
+                }
+                ch_vec.emplace_back(ch_data.ch_);
+                efn_vec.emplace_back(ch_data.efn_);
+                event_id_vec.emplace_back(evt.event_id_);
+                ts_vec.emplace_back(evt.ts_);
+                if (bg_fitter_)
+                    bg_fitter_->AddPulse(pulse, ch_data.ch_);
             }
-            ch_vec.emplace_back(ch_data.ch_);
-            efn_vec.emplace_back(ch_data.efn_);
-            event_id_vec.emplace_back(evt.event_id_);
-            ts_vec.emplace_back(evt.ts_);
-            if (bg_fitter_)
-                bg_fitter_->AddPulse(pulse, ch_data.ch_);
         }
     }
-
     std::vector<std::vector<float>> pulse_vec;
     if (bg_fitter_)
     {
@@ -99,6 +103,8 @@ void mira::FitterClass::FitSingleBatch(const std::vector<mira::EventData> &input
             for (const auto &ch_data : evt.data_)
             {
                 std::vector<float> pulse;
+                if (!ch_data.size_)
+                    continue;
                 for (int i = 0; i < ch_data.size_; ++i)
                 {
                     pulse.emplace_back((float)ch_data.waveform_[i]);

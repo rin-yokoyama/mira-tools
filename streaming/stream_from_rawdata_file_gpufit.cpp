@@ -4,7 +4,7 @@
 #include "mira_constants.h"
 #include "mira_decoder.hpp"
 #include "mira_streaming.hpp"
-#include "mira_Parquet.hpp"
+#include "mira_ParquetGPU.hpp"
 #include "mira_gpufit.hpp"
 
 int main(int argc, char **argv)

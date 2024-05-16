@@ -33,7 +33,7 @@ void mira::gpufit_multithread(
         std::rotate(future_vec.begin(), future_vec.begin() + 1, future_vec.end());
         std::rotate(thread_avail.begin(), thread_avail.begin() + 1, thread_avail.end());
         future_vec.back() = std::async(&mira::FitterClass::FitSingleBatch, fitter_vec.back(), batch_input);
-        std::cout << "fitter[" << fitter_vec.back()->GetId() << "] is started." << std::endl;
+        std::cout << "fitter[" << fitter_vec.back()->GetId() << "] is started. Size = " << batch_input.size() << std::endl;
         thread_avail.back() = false;
         if (!thread_avail[0])
         {

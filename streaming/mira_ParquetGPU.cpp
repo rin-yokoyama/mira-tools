@@ -3,7 +3,7 @@
 mira::FitDataWriter::FitDataWriter()
 {
     // Define the memory pool
-    pool = arrow::default_memory_pool();
+    pool_ = arrow::default_memory_pool();
 
     // Define schema
     schema_ = arrow::schema({arrow::field("efn", arrow::int32()),
@@ -16,15 +16,15 @@ mira::FitDataWriter::FitDataWriter()
                              arrow::field("fit_params", arrow::list(arrow::float32()))});
 
     // Define Arrow builders
-    efn_builder_ = std::make_shared<arrow::Int32Builder>(pool);
-    channel_builder_ = std::make_shared<arrow::Int32Builder>(pool);
-    event_id_builder_ = std::make_shared<arrow::Int64Builder>(pool);
-    ts_builder_ = std::make_shared<arrow::Int64Builder>(pool);
-    state_builder_ = std::make_shared<arrow::Int32Builder>(pool);
-    chi_squared_builder_ = std::make_shared<arrow::FloatBuilder>(pool);
-    n_iteration_builder_ = std::make_shared<arrow::Int32Builder>(pool);
-    param_builder_ = std::make_shared<arrow::FloatBuilder>(pool);
-    fit_params_builder_ = std::make_shared<arrow::ListBuilder>(pool, param_builder_);
+    efn_builder_ = std::make_shared<arrow::Int32Builder>(pool_);
+    channel_builder_ = std::make_shared<arrow::Int32Builder>(pool_);
+    event_id_builder_ = std::make_shared<arrow::Int64Builder>(pool_);
+    ts_builder_ = std::make_shared<arrow::Int64Builder>(pool_);
+    state_builder_ = std::make_shared<arrow::Int32Builder>(pool_);
+    chi_squared_builder_ = std::make_shared<arrow::FloatBuilder>(pool_);
+    n_iteration_builder_ = std::make_shared<arrow::Int32Builder>(pool_);
+    param_builder_ = std::make_shared<arrow::FloatBuilder>(pool_);
+    fit_params_builder_ = std::make_shared<arrow::ListBuilder>(pool_, param_builder_);
 }
 
 void mira::FitDataWriter::Fill(const std::vector<mira::OutputData> &data)
@@ -74,7 +74,7 @@ void mira::FitDataWriter::WriteParquetFile(std::string name, std::shared_ptr<arr
         arrow::io::FileOutputStream::Open(name));
 
     PARQUET_THROW_NOT_OK(
-        parquet::arrow::WriteTable(*table, pool, outfile));
+        parquet::arrow::WriteTable(*table, pool_, outfile));
 }
 
 std::shared_ptr<arrow::Buffer> mira::FitDataWriter::WriteStream(std::shared_ptr<arrow::Table> table)
@@ -83,9 +83,12 @@ std::shared_ptr<arrow::Buffer> mira::FitDataWriter::WriteStream(std::shared_ptr<
     auto sink = arrow::io::BufferOutputStream::Create().ValueOrDie();
     arrow::TableBatchReader reader(table);
     std::shared_ptr<arrow::RecordBatch> batch;
-    reader.ReadNext(&batch);
-    auto writer = arrow::ipc::MakeStreamWriter(sink, schema_).ValueOrDie();
-    writer->WriteRecordBatch(*batch.get());
-    writer->Close();
+    auto readState = reader.ReadNext(&batch);
+    if (readState.ok() && batch.get())
+    {
+        auto writer = arrow::ipc::MakeStreamWriter(sink, schema_).ValueOrDie();
+        writer->WriteRecordBatch(*batch.get());
+        writer->Close();
+    }
     return *sink->Finish();
 }
