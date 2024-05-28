@@ -63,8 +63,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/streaming/file2stream",
             "args": [
-                "/home/daq/mira/test.dat",
-                "192.168.0.2:9092"
+                "/home/daq/mira/temp.dat",
+                "192.168.0.2:9092,192.168.0.9:9092"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

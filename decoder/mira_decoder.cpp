@@ -12,7 +12,15 @@ mira::EventData mira::decode_an_event(u_int32_t *buf, u_int32_t &size, const std
     const auto event_size = mira::get_size32(next());
     u_int32_t addr = next();
     const u_int32_t event_n = next();
-    const u_int64_t ts = (((u_int64_t)next()) << 32) + next();
+    const u_int32_t tslo = (u_int32_t)next();
+    const u_int32_t tshi = (u_int32_t)next();
+    const auto a = (tshi & 0xffff << 16);
+    const auto b = (tshi & 0xffff0000 >> 16);
+    const u_int32_t tsh = a + b;
+    const auto c = (tslo & 0xffff) << 16;
+    const auto d = (tslo & 0xffff0000) >> 16;
+    const u_int32_t tsl = c + d;
+    const u_int64_t ts = (((u_int64_t)tsh) << 32) + (u_int64_t)tsl;
 
     mira::EventData eventData;
     eventData.event_id_ = event_n;
@@ -41,8 +49,9 @@ mira::EventData mira::decode_an_event(u_int32_t *buf, u_int32_t &size, const std
             if (mira::kQDCADCFlag)
             {
                 data.waveform_vec_.insert(data.waveform_vec_.end(), data.waveform_, data.waveform_ + data.size_);
-                data.qdc_ = mira::calculate_qdc(data.waveform_vec_);
-                data.adc_ = mira::calculate_adc(data.waveform_vec_);
+                const auto polarity = mira::kChPolarityMap.at(channel_id);
+                data.qdc_ = mira::calculate_qdc(data.waveform_vec_, polarity);
+                data.adc_ = mira::calculate_adc(data.waveform_vec_, polarity);
             }
             eventData.data_.emplace_back(data);
             skip(segment_size - 3);

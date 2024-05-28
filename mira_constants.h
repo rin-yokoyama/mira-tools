@@ -10,7 +10,7 @@ namespace mira
     // Constants for QDC/ADC
     const bool kQDCADCFlag = true;
     const float kPrePulseRatio = 0.1;
-    const float kAfterPulseRatio = 0.7;
+    const float kAfterPulseRatio = 0.5;
 
     // Constants for background subtraction
     const std::pair<int, int> kBGFitRange = {0, 0};
@@ -24,7 +24,7 @@ namespace mira
     const int kNCpu = 0;
     const std::vector<int> kPulseFitRange = {10, 210};
     const int kPrePulseRange = 70;
-    const float kInitialPeakTime = 85; // negative value for auto detect
+    const float kInitialPeakTime = 97; // negative value for auto detect
     const float kInitialRiseTime = 1;
     const float kInitialDecayTime = 5;
 

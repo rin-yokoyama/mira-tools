@@ -48,13 +48,16 @@ namespace mira
      * @param waveform : waveform vector
      * @return double : maximum element, baseline subtracted.
      */
-    inline double calculate_adc(const std::vector<u_int16_t> &waveform)
+    inline double calculate_adc(const std::vector<u_int16_t> &waveform, int polarity = 1)
     {
         if (waveform.empty())
             return 0;
         const int pre = waveform.size() * mira::kPrePulseRatio;
         const double ave = std::accumulate(waveform.begin(), waveform.begin() + pre, 0.0f) / pre;
-        return *std::max_element(waveform.begin(), waveform.end()) - ave;
+        if (polarity > 0)
+            return *std::max_element(waveform.begin(), waveform.end()) - ave;
+        else
+            return ave - (*std::min_element(waveform.begin(), waveform.end()));
     }
 
     /**
@@ -63,7 +66,7 @@ namespace mira
      * @param waveform : waveform vector
      * @return double : qdc, baseline subtracted.
      */
-    inline double calculate_qdc(const std::vector<u_int16_t> &waveform)
+    inline double calculate_qdc(const std::vector<u_int16_t> &waveform, int polarity = 1)
     {
         if (waveform.empty())
             return 0;
@@ -71,7 +74,10 @@ namespace mira
         const int after = waveform.size() * mira::kAfterPulseRatio;
         const double ave = std::accumulate(waveform.begin() + pre, waveform.begin() + after, 0.0f) / (after - pre);
         const double ave_pre = std::accumulate(waveform.begin(), waveform.begin() + pre, 0.0f) / pre;
-        return ave - ave_pre;
+        if (polarity > 0)
+            return ave - ave_pre;
+        else
+            return ave_pre - ave;
     }
 
     /**
