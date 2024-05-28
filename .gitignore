@@ -7,6 +7,11 @@
 /viewer/dist
 /viewer/.parcel-cache
 
+/stream_viewer/node_modules
+/stream_viewer/package-lock.json
+/stream_viewer/dist
+/stream_viewer/.parcel-cache
+
 thismira-tools.sh
 *.png
 *.pdf
